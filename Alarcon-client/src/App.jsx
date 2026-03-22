@@ -1,21 +1,41 @@
-import React from 'react';
-import './App.css'
+import {createBrowserRouter, RouterProvider} from 'react-router-dom'
 
-function App() {
+//HomePage Structure 
+import Layout from './components/Layout';
+import ArticlePage from './pages/ArticlePage';
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
 
+const routes =[
+  {
+    path: '/',
+    element: <Layout />,
+    children:[
+      {
+        path: '/',
+        element: <HomePage />
+      },
+      {
+        path: '/about',
+        element: <AboutPage />
+      },
+      {
+        path: '/articles',
+        element: <ArticlePage />
+      },
+    ],
+  },
+];
+
+const router = createBrowserRouter(routes);
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-       <h1>Welcom to My React App</h1>
-        <p>
-          Name: Ahldrin Alarcon <br />
-          Email: alarconaa@students.national-u.edu.ph<br />
-          Other Personal Info: Minsan absent | <a href='https://github.com/Ahhhldrin/alarcon-webprog'>Github Profile</a>
-        </p> 
-        </header>
-    </div>
-  );
+    <>
+      <RouterProvider router={router} />
+    </>
+  )
 }
 
-
 export default App
+
