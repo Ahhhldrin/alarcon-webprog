@@ -1,16 +1,19 @@
-import {createBrowserRouter, RouterProvider} from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
-//HomePage Structure 
-import Layout from './components/Layout';
-import ArticlePage from './pages/ArticlePage';
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
+// HomePage Structure
+import Layout from './components/Layout'
+import ArticleListPage from './pages/ArticleListPage'
+import ArticlePage from './pages/ArticlePage'
+import HomePage from './pages/HomePage'
+import AboutPage from './pages/AboutPage'
+import NotFoundPage from './pages/NotFoundPage.jsx'
 
-const routes =[
+const routes = [
   {
     path: '/',
     element: <Layout />,
-    children:[
+    errorElement: <NotFoundPage />,
+    children: [
       {
         path: '/',
         element: <HomePage />
@@ -21,20 +24,20 @@ const routes =[
       },
       {
         path: '/articles',
-        element: <ArticlePage />
+        element: <ArticleListPage />
       },
-    ],
-  },
-];
+      {
+        path: '/articles/:name',
+        element: <ArticlePage />
+      }
+    ]
+  }
+]
 
-const router = createBrowserRouter(routes);
+const router = createBrowserRouter(routes)
 
 const App = () => {
-  return (
-    <>
-      <RouterProvider router={router} />
-    </>
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App

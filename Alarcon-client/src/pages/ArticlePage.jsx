@@ -1,11 +1,31 @@
+import { useParams } from 'react-router-dom';
 import Button from '../components/Button';
 import { SmokeBackground } from '../components/ui/spooky-smoke-animation';
+import articles from '../assets/style/article-content.js';
 import reactImg from '../assets/images/react.png';
 import flutterImg from '../assets/images/flutter.png';
 import pythonImg from '../assets/images/python.jpg';
 import wiresharkImg from '../assets/images/wireshark.png';
 
 const ArticlePage = () => {
+    const { name } = useParams();
+    const article = articles.find(article => article.name === name);
+
+    if (!article) {
+        return (
+            <div className="flex w-full flex-col gap-6">
+                <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+                    <div className="mx-auto max-w-3xl">
+                        <h1 className="text-3xl font-bold text-zinc-900">Article not found</h1>
+                        <Button to="/articles" className="mt-6">
+                            Back to Articles
+                        </Button>
+                    </div>
+                </section>
+            </div>
+        );
+    }
+
     return (
         <div className="flex w-full flex-col gap-6">
             <section className="relative min-h-[500px] border-y-2 border-zinc-900 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 overflow-hidden bg-gradient-to-b from-transparent to-zinc-50">
@@ -105,6 +125,17 @@ const ArticlePage = () => {
                     </article>
                 </div>
             </section>
+
+            {/* Footer with Gallery Dept Logo */}
+            <footer className="border-t-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+                <div className="flex justify-center">
+                    <img 
+                        src="/src/assets/galdept/gallerydepy-logo.png" 
+                        alt="Gallery Dept Logo" 
+                        className="h-12 w-auto object-contain"
+                    />
+                </div>
+            </footer>
         </div>
     );
 };
