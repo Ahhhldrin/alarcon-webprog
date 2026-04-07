@@ -1,57 +1,56 @@
+import galdeptImg from '../galdept/galdept.jpg';
+import galdept2Img from '../galdept/galdept2.jpg';
+import galdept3Img from '../galdept/galdept3.jpg';
+import galdept4Img from '../galdept/galdept4.jpg';
+import galdept5Img from '../galdept/galdept5.jpg';
+
 const articles = [
   {
-    name: "react-props-and-styling",
+    name: "french-parker-shirt",
     title: "FRENCH PARKER SHIRT",
-    image: "/src/assets/galdept/galdept.jpg",
+    image: galdeptImg,
     content: [
-      "French Parker shirt designed with a boxy, wide fit and point collar.",
-      "Example:\nfunction Welcome(props) {\n  return <h1>Hello, {props.name}!<\/h1>;\n}\n",
-      "React supports multiple styling approaches: inline styles, CSS files, CSS Modules, and styled-components.",
-      "Inline Style Example:\nconst style = { color: 'blue' };\n<p style={style}>Styled Text<\/p>"
+      "French Parker shirt designed with a boxy, wide fit and point collar. Features a tonal button closure and front pocket detailed with the FRENCH logotype.",
+      "Artistic Details:\nShort sleeve button-up shirt.\nTextured fabric with subtle patterns.\nBoxy, wide fit\nPoint Collar\n\nMade in Portugal\n\nMaterial 100% Cotton\n",
+
     ]
   },
   {
-    name: "react-functional-components",
+    name: "branko-carpenter-shorts",
     title: "BRANKO CARPENTER SHORTS",
-    image: "/src/assets/galdept/galdept2.jpg",
+    image: galdept2Img,
     content: [
       "Relaxed carpenter short with distressed detailing and a worn-in finish, created through our patented wash process.",
-      "They are stateless by default but can use hooks like useState and useEffect.",
-      "Example:\nfunction HelloWorld() {\n  return <h1>Hello, World!<\/h1>;\n}\n",
-      "They are preferred in modern React apps for simplicity and performance."
+      "Artistic Details:\nRelaxed carpenter shorts.\nDistressed detailing throughout.\nDebosed tan leather GALLERY DEPT. jarcon on the back waistband.\n\nMade in USA\n\nMaterial 100% Cotton\n"
+
     ]
   },
   {
-    name: "react-component-lifecycle",
+    name: "40-year-tee",
     title: "40-YEAR TEE",
-    image: "/src/assets/galdept/galdept3.jpg",
+    image: galdept3Img,
     content: [
       "Relaxed 90’s fit short sleeve featuring layered ATK RECORDS graphics and black glitter GD ENGLISH typography.",
-      "Key methods include: componentDidMount, componentDidUpdate, componentWillUnmount.",
-      "Functional components use the useEffect hook to mimic lifecycle behavior.",
-      "Example:\nuseEffect(() => {\n  console.log('Mounted');\n  return () => console.log('Unmounted');\n}, []);"
+       "Artistic Details:\n\nART THAT KILLS is a Los Angeles based record label founded by Josue Thomas,\nRelaxed 90s fit short sleeve tee\n'ATK' graphic on the font.\nGO ENGLISH logotype overlayed with ATK typography on the back.\n\nMade in USA\n\nMaterial 100% Cotton\n"
     ]
   },
   {
-    name: "react-routing-basics",
+    name: "retouche-everglades-vest",
     title: "RETOUCHE EVERGLADES VEST",
-    image: "/src/assets/galdept/galdept4.jpg",
+    image: galdept4Img,
     content: [
-      "Lightweight nylon vest made from up-cycled safety jackets",
-      "Set up routes using BrowserRouter, Routes, and Route components.",
-      "Example:\n<Routes>\n  <Route path=\"/\" element={<Home />} />\n  <Route path=\"/about\" element={<About />} />\n</Routes>",
-      "Use Link component for navigation:\n<Link to=\"/about\">About<\/Link>"
+      "Lightweight nylon vest made from up-cycled safety jackets. Features multiple zip and open pockets, a shrunken FRENCH logo on the front, and enlarged FRENCH logo with 'Retouche' tag on the back.",
+      "Artistic Details:\nLightweight nylon vest.\nUp-cycled safety jackets.\nMultiple zip and open pockets.\nShrunken FRENCH logo on the front.\nEnlarged FRENCH logo with 'Retouche' tag on the back.\n\nMade in USA\n\nMaterial 100% Cotton / Lining: 100% Nylon / Constrast: 100% Polyester\n",
+
     ]
   },
   {
-    name: "react-state-management",
+    name: "ai-sweater",
     title: "AI SWEATER",
-    image: "/src/assets/galdept/galdept5.jpg",
+    image: galdept5Img,
     content: [
-      "Relaxed crewneck sweatshirt with wide neckline, screen-printed jacket motif, and 'Art on Display' patch at cuff.",
-      "useState hook lets functional components manage state.",
-      "Example:\nconst [count, setCount] = useState(0);\n",
-      "Updating state triggers a re-render with the new value."
+      "Relaxed crewneck sweatshirt with wide neckline, screen-printed jacket motif, soft fuzzy interior, and 'Art on Display' patch at cuff.",
+      "Artistic Details:\nRelaxed crewneck sweatshirt.\nWide neckline.\nScreen-printed jacket motif.\nSoft fuzzy interior.\n\nMade in Portugal\n\nMaterial 100% Cotton\n"
     ]
   }
 ];
