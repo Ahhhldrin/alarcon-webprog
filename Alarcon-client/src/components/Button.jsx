@@ -13,14 +13,14 @@ const Button = ({
     className = '',
     ...rest
 }) => {
-    const classes =[
+    const classes = [
         'inline-flex items-center justify-center rounded-full border-2 border-zinc-900 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] transition',
         variantClasses[variant] ?? variant,
         className,
-
     ]
-    .join ('')
-    .trim();
+        .filter(Boolean)
+        .join(' ')
+        .trim();
 
     if (to) {
         return(

@@ -1,6 +1,6 @@
-import Button from '../components/Button'
-import ArticleList from '../components/ArticleList'
-import articles from '../assets/style/article-content.js'
+import Button from '../../components/Button.jsx'
+import ArticleList from '../../components/ArticleList.jsx'
+import articles from '../../assets/style/article-content.js'
 
 const ArticleListPage = () => {
   return (

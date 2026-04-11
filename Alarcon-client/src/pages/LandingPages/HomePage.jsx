@@ -1,8 +1,8 @@
-import Button from '../components/Button';
-import sys1 from '../assets/images/sys1.jpg';
-import sys2 from '../assets/images/sys2.jpg';
-import sys4 from '../assets/images/sys4.png';
-import { SmokeBackground } from '../components/ui/spooky-smoke-animation';
+import Button from '../../components/Button';
+import sys1 from '../../assets/images/sys1.jpg';
+import sys2 from '../../assets/images/sys2.jpg';
+import sys4 from '../../assets/images/sys4.png';
+import { SmokeBackground } from '../../components/ui/spooky-smoke-animation';
 
 const HomePage = () => {
     return (

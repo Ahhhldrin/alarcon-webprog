@@ -33,7 +33,7 @@ const Footer = () => {
         <div className="absolute inset-0 z-10 bg-black/20 backdrop-blur-sm">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="text-white/90 text-sm">
-              © 2024 Alarcon WebProg. All rights reserved.
+              © 2026 Alarcon WebProg. All rights reserved.
             </div>
             <nav className="flex items-center gap-1 sm:gap-2">
               <NavLink

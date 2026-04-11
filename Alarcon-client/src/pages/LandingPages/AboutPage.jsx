@@ -1,9 +1,9 @@
-import Button from '../components/Button';
-import { SmokeBackground } from '../components/ui/spooky-smoke-animation';
-import sys1 from '../assets/images/sys1.jpg';
-import sys2 from '../assets/images/sys2.jpg';
-import sys4 from '../assets/images/sys4.png';
-import sys5 from '../assets/images/sys5.png';
+import Button from '../../components/Button';
+import { SmokeBackground } from '../../components/ui/spooky-smoke-animation';
+import sys1 from '../../assets/images/sys1.jpg';
+import sys2 from '../../assets/images/sys2.jpg';
+import sys4 from '../../assets/images/sys4.png';
+import sys5 from '../../assets/images/sys5.png';
  
 const AboutPage = () => {
     return (

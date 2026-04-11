@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
-import Button from '../components/Button'
-import { SmokeBackground } from '../components/ui/spooky-smoke-animation'
+import Button from '../../components/Button'
+import { SmokeBackground } from '../../components/ui/spooky-smoke-animation'
 
 function NotFoundPage() {
   const navigate = useNavigate()

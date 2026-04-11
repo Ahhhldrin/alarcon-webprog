@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 
-// --- FRAGMENT SHADER ---
 // We add a `u_color` uniform to accept a color from our component.
 const fragmentShaderSource = `#version 300 es
 precision highp float;
@@ -39,7 +38,6 @@ void main(){
   O=vec4(col,1);
 }`;
 
-// --- RENDERER CLASS ---
 // Updated to handle the new color uniform
 class Renderer {
   private readonly vertexSrc = `#version 300 es
@@ -79,6 +77,10 @@ void main(){gl_Position=position;}`;
       this.canvas.height = (rect.height || 500) * dpr;
     }
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  setViewport(width: number, height: number) {
+    this.gl.viewport(0, 0, width, height);
   }
 
   private compile(shader: WebGLShader, source: string) {
@@ -190,7 +192,7 @@ export const SmokeBackground: React.FC<SmokeBackgroundProps> = ({
                 canvas.width = (rect.width || 500) * dpr;
                 canvas.height = (rect.height || 500) * dpr;
                 
-                renderer.gl.viewport(0, 0, canvas.width, canvas.height);
+                renderer.setViewport(canvas.width, canvas.height);
             };
             
             // Set initial size
