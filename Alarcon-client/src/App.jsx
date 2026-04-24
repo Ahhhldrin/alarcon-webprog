@@ -12,6 +12,11 @@ import AuthLayout from './layouts/AuthLayout.jsx'
 import SignInPage from './pages/AuthPages/SignInPage.jsx'
 import SignUpPage from './pages/AuthPages/SignUpPage.jsx' 
 
+import DashLayout from './layouts/DashLayout.jsx'
+import DashboardPage from './pages/DashboardPages/DashboardPages.jsx'
+import ReportsPage from './pages/DashboardPages/ReportsPage.jsx'
+import UsersPage from './pages/DashboardPages/UsersPage.jsx'
+
 import NotFoundPage from './pages/LandingPages/NotFoundPage.jsx'
 
 
@@ -53,6 +58,25 @@ const routes = [
       path: 'signup',
       element: <SignUpPage />
     }
+  ],
+},
+{
+  path: '/dashboard',
+  element: <DashLayout />,
+  errorElement: <NotFoundPage />,
+  children: [
+    {
+      path: '',
+      element: <DashboardPage />
+    },
+    {
+      path: 'reports',
+      element: <ReportsPage />
+    },
+    {
+      path: 'users',
+      element: <UsersPage />
+    },
   ],
 },
 ];
