@@ -1,10 +1,41 @@
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Button from '../../components/Button';
-import articles from '../../assets/style/article-content.js';
+import { fetchArticleByName } from '../../services/ArticleService.js';
+import { resolveArticleImage } from '../../data/articleImageMap.js';
 
 const ArticlePage = () => {
     const { name } = useParams();
-    const article = articles.find((article) => article.name === name);
+    const [article, setArticle] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadArticle = async () => {
+            try {
+                setLoading(true);
+                const response = await fetchArticleByName(name);
+                setArticle(response.data);
+            } catch {
+                setArticle(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadArticle();
+    }, [name]);
+
+    if (loading) {
+        return (
+            <div className="flex w-full flex-col gap-6">
+                <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+                    <div className="mx-auto max-w-3xl">
+                        <p className="text-sm text-zinc-600">Loading article...</p>
+                    </div>
+                </section>
+            </div>
+        );
+    }
 
     if (!article) {
         return (
@@ -46,8 +77,8 @@ const ArticlePage = () => {
             <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
                 <div className="mx-auto max-w-3xl">
                     <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] border-2 border-zinc-900 bg-zinc-200 mb-8 overflow-hidden">
-                        {article.image ? (
-                            <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+                        {resolveArticleImage(article.image) ? (
+                            <img src={resolveArticleImage(article.image)} alt={article.title} className="w-full h-full object-cover" />
                         ) : (
                             <div className="h-24 w-24 border-2 border-zinc-300 bg-zinc-100" />
                         )}

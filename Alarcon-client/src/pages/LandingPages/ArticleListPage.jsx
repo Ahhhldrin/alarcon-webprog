@@ -1,8 +1,26 @@
+import { useEffect, useState } from 'react'
 import Button from '../../components/Button.jsx'
 import ArticleList from '../../components/ArticleList.jsx'
-import articles from '../../assets/style/article-content.js'
+import { fetchArticles } from '../../services/ArticleService.js'
 
 const ArticleListPage = () => {
+  const [articles, setArticles] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadArticles = async () => {
+      try {
+        const response = await fetchArticles({ publishedOnly: true });
+        setArticles(Array.isArray(response.data) ? response.data : []);
+        setError("");
+      } catch (err) {
+        setError(err.response?.data?.message || err.message || "Failed to load articles.");
+      }
+    };
+
+    loadArticles();
+  }, []);
+
   return (
     <div className="flex w-full flex-col gap-6">
       <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -28,6 +46,7 @@ const ArticleListPage = () => {
           <h2 className="mt-2 text-2xl font-semibold text-zinc-900">OUR NEWEST DROPS</h2>
         </div>
 
+        {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
         <ArticleList articles={articles} />
       </section>
     </div>

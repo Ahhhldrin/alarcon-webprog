@@ -16,6 +16,8 @@ import DashLayout from './layouts/DashLayout.jsx'
 import DashboardPage from './pages/DashboardPages/DashboardPages.jsx'
 import ReportsPage from './pages/DashboardPages/ReportsPage.jsx'
 import UsersPage from './pages/DashboardPages/UsersPage.jsx'
+import DashArticleListPage from './pages/DashboardPages/DashArticleListPage.jsx'
+import ProtectedRoute from './components/auth/ProtectedRoute.jsx'
 
 import NotFoundPage from './pages/LandingPages/NotFoundPage.jsx'
 
@@ -62,7 +64,11 @@ const routes = [
 },
 {
   path: '/dashboard',
-  element: <DashLayout />,
+  element: (
+    <ProtectedRoute allowedRoles={["admin", "editor"]}>
+      <DashLayout />
+    </ProtectedRoute>
+  ),
   errorElement: <NotFoundPage />,
   children: [
     {
@@ -71,11 +77,27 @@ const routes = [
     },
     {
       path: 'reports',
-      element: <ReportsPage />
+      element: (
+        <ProtectedRoute allowedRoles={["admin", "editor"]} fallbackTo="/dashboard/articles">
+          <ReportsPage />
+        </ProtectedRoute>
+      )
     },
     {
       path: 'users',
-      element: <UsersPage />
+      element: (
+        <ProtectedRoute allowedRoles={["admin"]} fallbackTo="/dashboard/articles">
+          <UsersPage />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: 'articles',
+      element: (
+        <ProtectedRoute allowedRoles={["admin", "editor"]}>
+          <DashArticleListPage />
+        </ProtectedRoute>
+      )
     },
   ],
 },
@@ -88,4 +110,3 @@ const App = () => {
 }
 
 export default App
-

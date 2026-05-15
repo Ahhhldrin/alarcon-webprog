@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Button from './Button';
+import { resolveArticleImage } from '../data/articleImageMap';
 
 const ArticleList = ({ articles }) => {
   return (
@@ -7,8 +8,8 @@ const ArticleList = ({ articles }) => {
       {articles.map((article, index) => (
         <article key={article.name} className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
           <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
-            {article.image ? (
-              <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+            {resolveArticleImage(article.image) ? (
+              <img src={resolveArticleImage(article.image)} alt={article.title} className="w-full h-full object-cover" />
             ) : (
               <div className="h-12 w-12 border-2 border-zinc-300 bg-zinc-100" />
             )}
@@ -18,7 +19,7 @@ const ArticleList = ({ articles }) => {
           </p>
           <h3 className="mt-2 text-lg font-semibold text-zinc-900">{article.title}</h3>
           <p className="mt-3 text-sm leading-6 text-zinc-600">
-            {article.content[0].substring(0, 150)}...
+            {(article.content?.[0] || "").substring(0, 150)}...
           </p>
           <Link to={`/articles/${article.name}`}>
             <Button className="mt-4">Read More</Button>

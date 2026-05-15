@@ -20,35 +20,13 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import PeopleIcon from "@mui/icons-material/People";
-import AssessmentIcon from "@mui/icons-material/Assessment";
 import Button from "@mui/material/Button";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import Tooltip from "@mui/material/Tooltip";
+import { clearAuthSession, getStoredUser } from "../utils/auth";
+import { dashboardNavItems } from "../data/dashboardNav";
 
 const drawerWidth = 240;
-
-const dashboardNavItems = [
-  {
-    label: "Dashboard",
-    title: "Dashboard",
-    to: "/dashboard",
-    icon: DashboardIcon,
-  },
-  {
-    label: "Reports",
-    title: "Reports",
-    to: "/dashboard/reports",
-    icon: AssessmentIcon,
-  },
-  {
-    label: "Users",
-    title: "Users",
-    to: "/dashboard/users",
-    icon: PeopleIcon,
-  },
-];
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -162,6 +140,10 @@ const DashLayout = () => {
     const location = useLocation();
     const pageTitle = getPageTitle(location.pathname);
     const navigate = useNavigate();
+    const currentUser = getStoredUser();
+    const allowedNavItems = dashboardNavItems.filter(({ roles }) =>
+      roles.includes(String(currentUser?.role ?? "").toLowerCase())
+    );
   
     const handleDrawerOpen = () => {
       setOpen(true);
@@ -172,6 +154,7 @@ const DashLayout = () => {
     };
   
     const handleLogout = () => {
+      clearAuthSession();
       navigate("/auth/signin");
     };
   
@@ -217,8 +200,10 @@ const DashLayout = () => {
                 />
               </Search>
   
-              <Tooltip title="My profile">
-                <Avatar sx={{ width: 34, height: 34, bgcolor: "#0f766e", mr: 1.5 }}>A</Avatar>
+              <Tooltip title={currentUser?.email || "My profile"}>
+                <Avatar sx={{ width: 34, height: 34, bgcolor: "#0f766e", mr: 1.5 }}>
+                  {String(currentUser?.firstName?.[0] || currentUser?.email?.[0] || "U").toUpperCase()}
+                </Avatar>
               </Tooltip>
               <Button color="inherit" variant="outlined" onClick={handleLogout} sx={{ borderRadius: 2 }}>
                 Logout
@@ -266,7 +251,7 @@ const DashLayout = () => {
   
             {/* Drawer List */}
             <List>
-              {dashboardNavItems.map(({ label, to, icon }) => {
+              {allowedNavItems.map(({ label, to, icon }) => {
                 const NavIcon = icon;
                 return (
                 <ListItem key={to} disablePadding sx={{ display: "block" }}>

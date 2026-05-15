@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Alert,
   Box,
@@ -25,8 +25,9 @@ import {
 import { useTheme } from "@mui/material/styles";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { DataGrid } from "@mui/x-data-grid";
-import usersSeed from "../../components/data/users.json?raw";
+import { fetchUsers, createUser, updateUser, deleteUser } from "../../services/UserService.js";
 
 const roles = ["admin", "editor", "viewer"];
 const genders = ["male", "female", "other"];
@@ -47,47 +48,13 @@ const blankForm = {
 
 const labelize = (value) => (value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : "-");
 
-const loadUsers = () => {
-  try {
-    return {
-      users: JSON.parse(usersSeed).map((user, index) => ({
-        id: Number(user.id) || index + 1,
-        firstName: String(user.firstName ?? "").trim(),
-        lastName: String(user.lastName ?? "").trim(),
-        age: String(user.age ?? "").trim(),
-        gender: genders.includes(String(user.gender ?? "").trim().toLowerCase())
-          ? String(user.gender ?? "").trim().toLowerCase()
-          : "",
-        contactNumber: String(user.contactNumber ?? "").trim(),
-        email: String(user.email ?? "").trim().toLowerCase(),
-        role: roles.includes(String(user.role ?? "").trim().toLowerCase())
-          ? String(user.role ?? "").trim().toLowerCase()
-          : "editor",
-        username: String(user.username ?? "").trim().toLowerCase(),
-        password: String(user.password ?? ""),
-        address: String(user.address ?? "").trim(),
-        isActive: typeof user.isActive === "boolean" ? user.isActive : true,
-      })),
-      error: "",
-    };
-  } catch {
-    return {
-      users: [],
-      error: "Unable to read users from src/components/data/users.json.",
-    };
-  }
-};
-
-const seed = loadUsers();
-
 const UsersPage = () => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [users, setUsers] = useState(seed.users);
+  const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(blankForm);
-  const [seedError] = useState(seed.error);
   const [error, setError] = useState("");
   const [editRowId, setEditRowId] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -96,6 +63,63 @@ const UsersPage = () => {
   const [genderFilter, setGenderFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paginationModel, setPaginationModel] = useState({ pageSize: 5, page: 0 });
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+
+  // Fetch users on component mount
+  useEffect(() => {
+    const loadUsersFromAPI = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchUsers();
+        if (response.data && Array.isArray(response.data)) {
+          setUsers(response.data.map((user, index) => ({
+            id: user.id || index + 1,
+            firstName: String(user.firstName ?? "").trim(),
+            lastName: String(user.lastName ?? "").trim(),
+            age: String(user.age ?? "").trim(),
+            gender: genders.includes(String(user.gender ?? "").trim().toLowerCase())
+              ? String(user.gender ?? "").trim().toLowerCase()
+              : "",
+            contactNumber: String(user.contactNumber ?? "").trim(),
+            email: String(user.email ?? "").trim().toLowerCase(),
+            role: roles.includes(String(user.role ?? "").trim().toLowerCase())
+              ? String(user.role ?? "").trim().toLowerCase()
+              : "editor",
+            username: String(user.username ?? "").trim().toLowerCase(),
+            password: String(user.password ?? ""),
+            address: String(user.address ?? "").trim(),
+            isActive: typeof user.isActive === "boolean" ? user.isActive : true,
+          })));
+          setApiError("");
+        }
+      } catch (err) {
+        const errorMessage = err.response?.data?.message || err.message || "Failed to load users.";
+        setApiError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsersFromAPI();
+  }, []);
+
+  const handleDelete = async (userId) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+    try {
+      setLoading(true);
+      await deleteUser(userId);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      setApiError("");
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || "Failed to delete user.";
+      setApiError(errorMessage);
+      console.error("Delete error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsers = useMemo(() => {
     const value = query.trim().toLowerCase();
@@ -149,7 +173,7 @@ const UsersPage = () => {
       email: row.email ?? "",
       role: row.role ?? "editor",
       username: row.username ?? "",
-      password: row.password ?? "",
+      password: "",
       address: row.address ?? "",
       isActive: Boolean(row.isActive),
     });
@@ -166,7 +190,7 @@ const UsersPage = () => {
     setShowPassword(false);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const required = [
       "firstName",
       "lastName",
@@ -176,9 +200,11 @@ const UsersPage = () => {
       "email",
       "role",
       "username",
-      "password",
       "address",
     ];
+    if (!editRowId) {
+      required.push("password");
+    }
     const missing = required.some((field) => !String(form[field]).trim());
     if (missing) {
       setError("Please complete all required fields.");
@@ -206,7 +232,12 @@ const UsersPage = () => {
       return;
     }
 
-    if (form.password.length < 8) {
+    if (!editRowId && form.password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
+    if (editRowId && form.password && form.password.length < 8) {
       setError("Password must be at least 8 characters.");
       return;
     }
@@ -244,21 +275,48 @@ const UsersPage = () => {
       email: form.email.trim().toLowerCase(),
       role: form.role,
       username: form.username.trim().toLowerCase(),
-      password: form.password,
       address: form.address.trim(),
       isActive: form.isActive,
     };
 
-    if (editRowId) {
-      setUsers((prev) =>
-        prev.map((user) => (user.id === editRowId ? { ...user, ...userPayload } : user))
-      );
-    } else {
-      const nextId = users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1;
-      setUsers((prev) => [{ id: nextId, ...userPayload }, ...prev]);
-    }
+    try {
+      setLoading(true);
+      
+      if (editRowId) {
+        // Update existing user
+        await updateUser(editRowId, {
+          ...userPayload,
+          password: form.password,
+        });
+        setUsers((prev) =>
+          prev.map((user) =>
+            user.id === editRowId
+              ? {
+                  ...user,
+                  id: editRowId,
+                  ...userPayload,
+                }
+              : user
+          )
+        );
+      } else {
+        // Create new user
+        const response = await createUser({
+          ...userPayload,
+          password: form.password,
+        });
+        setUsers((prev) => [response.data, ...prev]);
+      }
 
-    handleCloseDialog();
+      handleCloseDialog();
+      setApiError("");
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || "Failed to save user.";
+      setError(errorMessage);
+      console.error("Save error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns = [
@@ -303,13 +361,24 @@ const UsersPage = () => {
     {
       field: "actions",
       headerName: "Actions",
-      width: 110,
+      width: 140,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <Button size="small" onClick={() => handleOpenEditDialog(params.row)}>
-          Edit
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button size="small" onClick={() => handleOpenEditDialog(params.row)}>
+            Edit
+          </Button>
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => handleDelete(params.row.id)}
+            disabled={loading}
+            title="Delete user"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Stack>
       ),
     },
   ];
@@ -354,6 +423,7 @@ const UsersPage = () => {
               variant="contained"
               size="large"
               onClick={handleOpenAddDialog}
+              disabled={loading}
               sx={{
                 minWidth: { xs: "100%", sm: 180 },
                 alignSelf: { xs: "stretch", md: "flex-start" },
@@ -370,10 +440,8 @@ const UsersPage = () => {
           </Stack>
         </Paper>
 
-        {seedError ? (
-          <Alert severity="warning">
-            {seedError}
-          </Alert>
+        {apiError ? (
+          <Alert severity="error">{apiError}</Alert>
         ) : null}
 
         {error ? <Alert severity="error">{error}</Alert> : null}
@@ -527,6 +595,7 @@ const UsersPage = () => {
               value={form.password}
               onChange={handleFieldChange("password")}
               type={showPassword ? "text" : "password"}
+              helperText={editRowId ? "Leave blank to keep the current password." : ""}
               fullWidth
               slotProps={{
                 input: {
@@ -562,9 +631,9 @@ const UsersPage = () => {
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit} sx={{ borderRadius: 2 }}>
-            {editRowId ? "Update User" : "Save User"}
+          <Button onClick={handleCloseDialog} disabled={loading}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit} disabled={loading} sx={{ borderRadius: 2 }}>
+            {loading ? "Saving..." : editRowId ? "Update User" : "Save User"}
           </Button>
         </DialogActions>
       </Dialog>
