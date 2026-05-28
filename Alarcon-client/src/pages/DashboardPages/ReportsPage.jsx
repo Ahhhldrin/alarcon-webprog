@@ -13,8 +13,6 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { DataGrid } from "@mui/x-data-grid";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
@@ -53,35 +51,127 @@ const ReportsPage = () => {
 
     try {
       setIsExporting(true);
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      const printWindow = window.open("", "_blank", "width=1280,height=900");
+      if (!printWindow) return;
 
-      const canvas = await html2canvas(printContent, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#f8fafc",
-      });
+      const headMarkup = Array.from(document.querySelectorAll("style,link[rel='stylesheet']"))
+        .map((node) => node.outerHTML)
+        .join("");
 
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const imgData = canvas.toDataURL("image/png");
+      const exportedAt = new Intl.DateTimeFormat("en-US", {
+        dateStyle: "long",
+        timeStyle: "short",
+      }).format(new Date());
 
-      let heightLeft = imgHeight;
-      let y = 0;
-      pdf.addImage(imgData, "PNG", 0, y, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Reports Summary</title>
+            ${headMarkup}
+            <style>
+              @page { size: A4 portrait; margin: 10mm; }
+              * { box-sizing: border-box; }
+              body {
+                margin: 0;
+                font-family: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
+                color: #0f172a;
+                background: #ffffff;
+              }
+              .report-shell {
+                width: 100%;
+                max-width: 190mm;
+                margin: 0 auto;
+              }
+              .report-header {
+                margin-bottom: 14px;
+                padding: 14px;
+                border-radius: 12px;
+                background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+                color: #f8fafc;
+              }
+              .report-header h1 {
+                margin: 0 0 4px;
+                font-size: 22px;
+                font-weight: 700;
+              }
+              .report-header p {
+                margin: 0;
+                font-size: 12px;
+                line-height: 1.45;
+                color: rgba(248, 250, 252, 0.9);
+              }
+              .report-meta {
+                margin-top: 8px;
+                font-size: 11px;
+                color: rgba(226, 232, 240, 0.95);
+              }
+              .report-content {
+                display: grid;
+                gap: 10px;
+              }
+              .report-content .MuiCard-root {
+                box-shadow: none !important;
+                border: 1px solid #dbe4ef;
+                border-radius: 10px;
+                background: #ffffff;
+                break-inside: avoid;
+                page-break-inside: avoid;
+              }
+              .report-content .MuiCardContent-root {
+                padding: 12px !important;
+              }
+              .report-content .MuiTypography-h6 {
+                font-size: 15px;
+                margin-bottom: 4px;
+                font-weight: 700;
+              }
+              .report-content .MuiTypography-body2 {
+                font-size: 11px;
+              }
+              .report-content .MuiDataGrid-root {
+                border-radius: 8px;
+                overflow: hidden;
+              }
+              .report-content .MuiDataGrid-columnHeaders {
+                background-color: rgba(20, 184, 166, 0.12) !important;
+              }
+              .report-content .MuiDataGrid-footerContainer,
+              .report-content .MuiDataGrid-columnHeaderCheckbox,
+              .report-content .MuiDataGrid-cellCheckbox {
+                display: none !important;
+              }
+              .report-content svg {
+                max-width: 100% !important;
+                height: auto !important;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="report-shell">
+              <header class="report-header">
+                <h1>Reports Summary</h1>
+                <p>Analytics overview for generated reports, category breakdown, and completion performance.</p>
+                <p class="report-meta"><strong>Exported:</strong> ${exportedAt}</p>
+              </header>
+              <section class="report-content">
+                ${printContent.innerHTML}
+              </section>
+            </div>
+          </body>
+        </html>
+      `);
 
-      while (heightLeft > 0) {
-        y = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, y, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const timestamp = new Date().toISOString().slice(0, 10);
-      pdf.save(`reports-summary-${timestamp}.pdf`);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 450);
+      };
     } finally {
       setIsExporting(false);
     }
