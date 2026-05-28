@@ -2,6 +2,7 @@ import Button from '../../components/Button';
 import sys1 from '../../assets/images/sys1.jpg';
 import sys2 from '../../assets/images/sys2.jpg';
 import sys4 from '../../assets/images/sys4.png';
+import setupImg from '../../assets/images/setup.jpg';
 import { SmokeBackground } from '../../components/ui/spooky-smoke-animation';
 
 const HomePage = () => {
@@ -31,7 +32,7 @@ const HomePage = () => {
 
                     <div className="rounded-3xl border-2 border-dashed border-zinc-300 bg-zinc-100 p-6">
                         <div className="relative h-64 overflow-hidden rounded-[1.25rem] bg-zinc-200">
-                            <img src="/src/assets/images/setup.jpg" alt="Setup" className="w-full h-full object-cover" />
+                            <img src={setupImg} alt="Setup" className="w-full h-full object-cover" />
                         </div>
                     </div>
                 </div>

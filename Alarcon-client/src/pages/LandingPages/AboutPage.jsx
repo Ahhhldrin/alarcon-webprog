@@ -4,6 +4,7 @@ import sys1 from '../../assets/images/sys1.jpg';
 import sys2 from '../../assets/images/sys2.jpg';
 import sys4 from '../../assets/images/sys4.png';
 import sys5 from '../../assets/images/sys5.png';
+import setupImg from '../../assets/images/setup.jpg';
  
 const AboutPage = () => {
     return (
@@ -15,7 +16,7 @@ const AboutPage = () => {
                 <div className="relative z-10 grid gap-8 lg:grid-cols-2 lg:items-center">
                     <div className="rounded-3xl border-2 bordere-dashed border-zinc-300 bg-zinc-100 p-6">
                         <div className="relative h-64 overflow-hidden rounded-[1.25rem] bg-zinc-200">
-                            <img src="/src/assets/images/setup.jpg" alt="Setup" className="w-full h-full object-cover" />
+                            <img src={setupImg} alt="Setup" className="w-full h-full object-cover" />
                         </div>
                     </div>
  
