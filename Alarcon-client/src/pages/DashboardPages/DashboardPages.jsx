@@ -16,6 +16,18 @@ import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import AttachMoneyRoundedIcon from "@mui/icons-material/AttachMoneyRounded";
 import TimerRoundedIcon from "@mui/icons-material/TimerRounded";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import L from "leaflet";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 const stats = [
   {
@@ -270,6 +282,42 @@ const DashboardPage = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2.5,
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "divider",
+          overflow: "hidden",
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Location Map
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Quick view of the primary location for this dashboard.
+        </Typography>
+        <Box sx={{ height: { xs: 320, md: 420 }, width: "100%" }}>
+          <MapContainer
+            center={[14.604253, 120.994314]}
+            zoom={13}
+            style={{ height: "100%", width: "100%" }}
+          >
+            <TileLayer
+              attribution='&copy; OpenStreetMap contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[14.604253, 120.994314]}>
+              <Popup>
+                National University-Manila <br />
+                <span>551F Jhoscon St, Sampaloc, Manila, 1008 Metro Manila</span>
+              </Popup>
+            </Marker>
+          </MapContainer>
+        </Box>
+      </Paper>
       </Stack>
     </Container>
   );
