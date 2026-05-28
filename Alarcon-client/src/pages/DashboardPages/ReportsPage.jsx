@@ -46,7 +46,6 @@ const rows = [
 const ReportsPage = () => {
   const printRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [paginationModel, setPaginationModel] = useState({ pageSize: 5, page: 0 });
 
   const handleExportPdf = async () => {
     const printContent = printRef.current;
@@ -226,23 +225,18 @@ const ReportsPage = () => {
             <Grid size={{ xs: 12 }}>
               <Card sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
-                  <Box sx={{ height: isExporting ? "auto" : 420 }}>
+                  <Box sx={{ height: 420 }}>
                     <DataGrid
                       rows={rows}
                       columns={columns}
-                      pagination
-                      paginationModel={
-                        isExporting ? { pageSize: rows.length || 1, page: 0 } : paginationModel
-                      }
-                      onPaginationModelChange={(model) => {
-                        if (!isExporting) setPaginationModel(model);
+                      initialState={{
+                        pagination: {
+                          paginationModel: { pageSize: 5, page: 0 },
+                        },
                       }}
-                      pageSizeOptions={[5, rows.length]}
+                      pageSizeOptions={[5]}
                       checkboxSelection
                       disableRowSelectionOnClick
-                      disableVirtualization={isExporting}
-                      autoHeight={isExporting}
-                      hideFooter={isExporting}
                     />
                   </Box>
                 </CardContent>
