@@ -13,6 +13,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { DataGrid } from "@mui/x-data-grid";
+import html2canvas from "html2canvas";
 
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
@@ -51,17 +52,47 @@ const ReportsPage = () => {
 
     try {
       setIsExporting(true);
+      await new Promise((resolve) => setTimeout(resolve, 350));
+
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        windowWidth: printContent.scrollWidth,
+      });
+
+      const pageRatio = 1.4142; // A4 portrait ratio (h/w)
+      const pageHeightPx = Math.floor(canvas.width * pageRatio);
+      const images = [];
+
+      for (let y = 0; y < canvas.height; y += pageHeightPx) {
+        const sliceHeight = Math.min(pageHeightPx, canvas.height - y);
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = sliceHeight;
+        const ctx = pageCanvas.getContext("2d");
+        if (!ctx) continue;
+        ctx.drawImage(canvas, 0, y, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+        images.push(pageCanvas.toDataURL("image/png"));
+      }
+
       const printWindow = window.open("", "_blank", "width=1280,height=900");
       if (!printWindow) return;
-
-      const headMarkup = Array.from(document.querySelectorAll("style,link[rel='stylesheet']"))
-        .map((node) => node.outerHTML)
-        .join("");
 
       const exportedAt = new Intl.DateTimeFormat("en-US", {
         dateStyle: "long",
         timeStyle: "short",
       }).format(new Date());
+
+      const pagesHtml = images
+        .map(
+          (img, idx) => `
+            <section class="page ${idx < images.length - 1 ? "with-break" : ""}">
+              <img src="${img}" alt="Report page ${idx + 1}" />
+            </section>
+          `
+        )
+        .join("");
 
       printWindow.document.write(`
         <!DOCTYPE html>
@@ -70,113 +101,41 @@ const ReportsPage = () => {
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <title>Reports Summary</title>
-            ${headMarkup}
             <style>
-              @page { size: A4 portrait; margin: 10mm; }
-              * { box-sizing: border-box; }
-              body {
+              @page { size: A4 portrait; margin: 0; }
+              html, body {
                 margin: 0;
+                padding: 0;
+                background: #ffffff;
                 font-family: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
+              }
+              .meta {
+                padding: 10mm 10mm 0;
+                font-size: 11px;
+                color: #475569;
+              }
+              .meta strong {
                 color: #0f172a;
-                background: #ffffff;
               }
-              .report-shell {
+              .page {
+                width: 210mm;
+                min-height: 297mm;
+                padding: 10mm;
+                box-sizing: border-box;
+              }
+              .with-break {
+                page-break-after: always;
+              }
+              .page img {
                 width: 100%;
-                max-width: 190mm;
-                margin: 0 auto;
-              }
-              .report-header {
-                margin-bottom: 14px;
-                padding: 14px;
-                border-radius: 12px;
-                background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-                color: #f8fafc;
-              }
-              .report-header h1 {
-                margin: 0 0 4px;
-                font-size: 22px;
-                font-weight: 700;
-              }
-              .report-header p {
-                margin: 0;
-                font-size: 12px;
-                line-height: 1.45;
-                color: rgba(248, 250, 252, 0.9);
-              }
-              .report-meta {
-                margin-top: 8px;
-                font-size: 11px;
-                color: rgba(226, 232, 240, 0.95);
-              }
-              .report-content {
-                display: grid;
-                gap: 10px;
-              }
-              .report-content .MuiCard-root {
-                box-shadow: none !important;
-                border: 1px solid #dbe4ef;
-                border-radius: 10px;
-                background: #ffffff;
-                break-inside: avoid;
-                page-break-inside: avoid;
-              }
-              .report-content .MuiCardContent-root {
-                padding: 12px !important;
-              }
-              .report-content .MuiTypography-h6 {
-                font-size: 15px;
-                margin-bottom: 4px;
-                font-weight: 700;
-              }
-              .report-content .MuiTypography-body2 {
-                font-size: 11px;
-              }
-              .report-content .MuiDataGrid-root {
-                border-radius: 8px;
-                overflow: hidden;
-              }
-              .report-content .MuiDataGrid-main,
-              .report-content .MuiDataGrid-virtualScroller {
-                overflow: hidden !important;
-              }
-              .report-content .MuiDataGrid-columnHeaderTitle,
-              .report-content .MuiDataGrid-cellContent {
-                font-size: 10px !important;
-              }
-              .report-content .MuiDataGrid-columnHeaders {
-                background-color: rgba(20, 184, 166, 0.12) !important;
-              }
-              .report-content .MuiDataGrid-footerContainer,
-              .report-content .MuiDataGrid-columnHeaderCheckbox,
-              .report-content .MuiDataGrid-cellCheckbox {
-                display: none !important;
-              }
-              .report-content .MuiChartsWrapper-root,
-              .report-content .MuiChartsSurface-root {
-                width: 100% !important;
-                max-width: 100% !important;
-              }
-              .report-content .MuiChartsAxis-root text,
-              .report-content .MuiChartsLegend-root text {
-                font-size: 10px !important;
-              }
-              .report-content svg {
-                max-width: 100% !important;
-                height: auto !important;
+                height: auto;
+                display: block;
               }
             </style>
           </head>
           <body>
-            <div class="report-shell">
-              <header class="report-header">
-                <h1>Reports Summary</h1>
-                <p>Analytics overview for generated reports, category breakdown, and completion performance.</p>
-                <p class="report-meta"><strong>Exported:</strong> ${exportedAt}</p>
-              </header>
-              <section class="report-content">
-                ${printContent.innerHTML}
-              </section>
-            </div>
+            <div class="meta"><strong>Exported:</strong> ${exportedAt}</div>
+            ${pagesHtml}
           </body>
         </html>
       `);
@@ -187,7 +146,7 @@ const ReportsPage = () => {
         setTimeout(() => {
           printWindow.print();
           printWindow.close();
-        }, 900);
+        }, 400);
       };
     } finally {
       setIsExporting(false);
