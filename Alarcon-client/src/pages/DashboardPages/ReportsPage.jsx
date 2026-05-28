@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -13,6 +13,8 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { DataGrid } from "@mui/x-data-grid";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
@@ -43,117 +45,47 @@ const rows = [
 
 const ReportsPage = () => {
   const printRef = useRef(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [paginationModel, setPaginationModel] = useState({ pageSize: 5, page: 0 });
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     const printContent = printRef.current;
-    if (!printContent) return;
+    if (!printContent || isExporting) return;
 
-    const printWindow = window.open("", "_blank", "width=1200,height=900");
-    if (!printWindow) return;
+    try {
+      setIsExporting(true);
+      await new Promise((resolve) => setTimeout(resolve, 250));
 
-    const headMarkup = Array.from(document.querySelectorAll("style,link[rel='stylesheet']"))
-      .map((node) => node.outerHTML)
-      .join("");
+      const canvas = await html2canvas(printContent, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#f8fafc",
+      });
 
-    const exportedAt = new Intl.DateTimeFormat("en-US", {
-      dateStyle: "long",
-      timeStyle: "short",
-    }).format(new Date());
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const imgData = canvas.toDataURL("image/png");
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Reports PDF Export</title>
-        ${headMarkup}
-        <style>
-          @page { size: A4; margin: 12mm; }
-          * { box-sizing: border-box; }
-          body {
-            margin: 0;
-            font-family: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
-            background: #f8fafc;
-            color: #0f172a;
-          }
-          .report-shell { padding: 10px; }
-          .report-header {
-            margin-bottom: 18px;
-            padding: 18px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-            color: #f8fafc;
-          }
-          .report-header h1 { margin: 0 0 6px; font-size: 26px; font-weight: 700; letter-spacing: .2px; }
-          .report-header p { margin: 0; font-size: 13px; color: rgba(248, 250, 252, .88); line-height: 1.45; }
-          .report-meta {
-            margin-top: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            font-size: 12px;
-            color: rgba(226, 232, 240, .95);
-          }
-          .report-chip {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, .55);
-            background: rgba(15, 118, 110, .25);
-            color: #d1fae5;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .2px;
-          }
-          .report-content {
-            display: grid;
-            gap: 14px;
-          }
-          .report-content .MuiCard-root {
-            box-shadow: none !important;
-            border: 1px solid #dbe4ef;
-            border-radius: 12px;
-            background: #ffffff;
-            break-inside: avoid;
-          }
-          .report-content .MuiCardContent-root { padding: 16px; }
-          .report-content .MuiTypography-h6 {
-            color: #0f172a;
-            font-weight: 700;
-          }
-          .report-content .MuiDataGrid-root {
-            border-radius: 10px;
-            overflow: hidden;
-          }
-          .report-content .MuiDataGrid-columnHeaders {
-            background: rgba(20, 184, 166, 0.14) !important;
-          }
-          .report-content svg { max-width: 100%; height: auto; }
-        </style>
-      </head>
-      <body>
-        <div class="report-shell">
-          <header class="report-header">
-            <h1>Reports Summary</h1>
-            <p>Analytics overview for generated reports, category breakdown, and completion performance.</p>
-            <div class="report-meta">
-              <span class="report-chip">Monthly Metrics</span>
-              <span><strong>Exported:</strong> ${exportedAt}</span>
-            </div>
-          </header>
-          <section class="report-content">
-            ${printContent.innerHTML}
-          </section>
-        </div>
-      </body>
-      </html>
-    `);
+      let heightLeft = imgHeight;
+      let y = 0;
+      pdf.addImage(imgData, "PNG", 0, y, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
 
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
+      while (heightLeft > 0) {
+        y = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, y, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const timestamp = new Date().toISOString().slice(0, 10);
+      pdf.save(`reports-summary-${timestamp}.pdf`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -193,6 +125,7 @@ const ReportsPage = () => {
             <Button
               variant="contained"
               onClick={handleExportPdf}
+              disabled={isExporting}
               size="large"
               sx={{
                 minWidth: { xs: "100%", sm: 220 },
@@ -206,7 +139,7 @@ const ReportsPage = () => {
                 whiteSpace: "nowrap",
               }}
             >
-              Print / Save PDF
+              {isExporting ? "Exporting PDF..." : "Print / Save PDF"}
             </Button>
           </Stack>
         </Paper>
@@ -293,18 +226,23 @@ const ReportsPage = () => {
             <Grid size={{ xs: 12 }}>
               <Card sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider" }}>
                 <CardContent>
-                  <Box sx={{ height: 420 }}>
+                  <Box sx={{ height: isExporting ? "auto" : 420 }}>
                     <DataGrid
                       rows={rows}
                       columns={columns}
-                      initialState={{
-                        pagination: {
-                          paginationModel: { pageSize: 5, page: 0 },
-                        },
+                      pagination
+                      paginationModel={
+                        isExporting ? { pageSize: rows.length || 1, page: 0 } : paginationModel
+                      }
+                      onPaginationModelChange={(model) => {
+                        if (!isExporting) setPaginationModel(model);
                       }}
-                      pageSizeOptions={[5]}
+                      pageSizeOptions={[5, rows.length]}
                       checkboxSelection
                       disableRowSelectionOnClick
+                      disableVirtualization={isExporting}
+                      autoHeight={isExporting}
+                      hideFooter={isExporting}
                     />
                   </Box>
                 </CardContent>
