@@ -135,6 +135,14 @@ const ReportsPage = () => {
                 border-radius: 8px;
                 overflow: hidden;
               }
+              .report-content .MuiDataGrid-main,
+              .report-content .MuiDataGrid-virtualScroller {
+                overflow: hidden !important;
+              }
+              .report-content .MuiDataGrid-columnHeaderTitle,
+              .report-content .MuiDataGrid-cellContent {
+                font-size: 10px !important;
+              }
               .report-content .MuiDataGrid-columnHeaders {
                 background-color: rgba(20, 184, 166, 0.12) !important;
               }
@@ -142,6 +150,15 @@ const ReportsPage = () => {
               .report-content .MuiDataGrid-columnHeaderCheckbox,
               .report-content .MuiDataGrid-cellCheckbox {
                 display: none !important;
+              }
+              .report-content .MuiChartsWrapper-root,
+              .report-content .MuiChartsSurface-root {
+                width: 100% !important;
+                max-width: 100% !important;
+              }
+              .report-content .MuiChartsAxis-root text,
+              .report-content .MuiChartsLegend-root text {
+                font-size: 10px !important;
               }
               .report-content svg {
                 max-width: 100% !important;
@@ -170,7 +187,7 @@ const ReportsPage = () => {
         setTimeout(() => {
           printWindow.print();
           printWindow.close();
-        }, 450);
+        }, 900);
       };
     } finally {
       setIsExporting(false);
