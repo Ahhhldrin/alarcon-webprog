@@ -11,20 +11,24 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import Button from "@mui/material/Button";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import Tooltip from "@mui/material/Tooltip";
 import { clearAuthSession, getStoredUser } from "../utils/auth";
 import { dashboardNavItems } from "../data/dashboardNav";
+import { getAccountInitial, getUserDisplayName, getUserRoleLabel } from "../utils/navAccount";
 
 const drawerWidth = 240;
 
@@ -141,6 +145,10 @@ const DashLayout = () => {
     const pageTitle = getPageTitle(location.pathname);
     const navigate = useNavigate();
     const currentUser = getStoredUser();
+    const [accountMenuAnchor, setAccountMenuAnchor] = useState(null);
+    const isAccountMenuOpen = Boolean(accountMenuAnchor);
+    const displayName = getUserDisplayName(currentUser);
+    const roleLabel = getUserRoleLabel(currentUser);
     const allowedNavItems = dashboardNavItems.filter(({ roles }) =>
       roles.includes(String(currentUser?.role ?? "").toLowerCase())
     );
@@ -152,8 +160,22 @@ const DashLayout = () => {
     const handleDrawerClose = () => {
       setOpen(false);
     };
+
+    const handleOpenAccountMenu = (event) => {
+      setAccountMenuAnchor(event.currentTarget);
+    };
+
+    const handleCloseAccountMenu = () => {
+      setAccountMenuAnchor(null);
+    };
+
+    const handleGoToLandingPage = () => {
+      handleCloseAccountMenu();
+      navigate("/");
+    };
   
     const handleLogout = () => {
+      handleCloseAccountMenu();
       clearAuthSession();
       navigate("/auth/signin");
     };
@@ -200,14 +222,58 @@ const DashLayout = () => {
                 />
               </Search>
   
-              <Tooltip title={currentUser?.email || "My profile"}>
-                <Avatar sx={{ width: 34, height: 34, bgcolor: "#0f766e", mr: 1.5 }}>
-                  {String(currentUser?.firstName?.[0] || currentUser?.email?.[0] || "U").toUpperCase()}
-                </Avatar>
+              <Tooltip title="Account menu">
+                <IconButton
+                  color="inherit"
+                  onClick={handleOpenAccountMenu}
+                  aria-controls={isAccountMenuOpen ? "dashboard-account-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={isAccountMenuOpen ? "true" : undefined}
+                  sx={{ p: 0.25 }}
+                >
+                  <Avatar sx={{ width: 34, height: 34, bgcolor: "#0f766e" }}>
+                    {getAccountInitial(currentUser)}
+                  </Avatar>
+                </IconButton>
               </Tooltip>
-              <Button color="inherit" variant="outlined" onClick={handleLogout} sx={{ borderRadius: 2 }}>
-                Logout
-              </Button>
+              <Menu
+                id="dashboard-account-menu"
+                anchorEl={accountMenuAnchor}
+                open={isAccountMenuOpen}
+                onClose={handleCloseAccountMenu}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      mt: 1.25,
+                      minWidth: 240,
+                      borderRadius: 2,
+                      boxShadow: "0 18px 45px rgba(15,23,42,0.18)",
+                    },
+                  },
+                }}
+              >
+                <Box sx={{ px: 2, py: 1.5 }}>
+                  <Typography sx={{ fontWeight: 700, color: "#0f172a" }}>{displayName}</Typography>
+                  <Typography variant="body2" sx={{ color: "#64748b" }}>
+                    {roleLabel}
+                  </Typography>
+                </Box>
+                <Divider />
+                <MenuItem onClick={handleGoToLandingPage}>
+                  <ListItemIcon>
+                    <HomeOutlinedIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="Go to Landing Page" />
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="Sign Out" />
+                </MenuItem>
+              </Menu>
             </Toolbar>
           </AppBar>
   

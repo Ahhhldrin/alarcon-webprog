@@ -35,7 +35,7 @@ const stats = [
     value: "2,842",
     change: "+12.4%",
     icon: PeopleRoundedIcon,
-    iconSx: { fontSize: 20, mt: "-1px" },
+    iconSx: { fontSize: 20 },
     accent: "#0f766e",
   },
   {
@@ -43,7 +43,7 @@ const stats = [
     value: "$38,490",
     change: "+8.1%",
     icon: AttachMoneyRoundedIcon,
-    iconSx: { fontSize: 20, mt: "-1px" },
+    iconSx: { fontSize: 20 },
     accent: "#0891b2",
   },
   {
@@ -51,7 +51,7 @@ const stats = [
     value: "5.84%",
     change: "+1.6%",
     icon: TrendingUpRoundedIcon,
-    iconSx: { fontSize: 20, mt: "-1px" },
+    iconSx: { fontSize: 20 },
     accent: "#16a34a",
   },
   {
@@ -59,7 +59,7 @@ const stats = [
     value: "6m 31s",
     change: "+0.9%",
     icon: TimerRoundedIcon,
-    iconSx: { fontSize: 20, mt: "-1px" },
+    iconSx: { fontSize: 20 },
     accent: "#d97706",
   },
 ];
@@ -113,39 +113,46 @@ const DashboardPage = () => {
               elevation={0}
               sx={{
                 p: 2.5,
+                pr: 7.5,
                 borderRadius: 3,
                 border: "1px solid",
                 borderColor: "divider",
                 height: "100%",
+                position: "relative",
+                overflow: "hidden",
               }}
             >
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="body2" color="text.secondary">
+              <Avatar
+                sx={{
+                  bgcolor: item.accent,
+                  width: 34,
+                  height: 34,
+                  position: "absolute",
+                  top: 20,
+                  right: 20,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <StatIcon sx={item.iconSx} />
+              </Avatar>
+
+              <Stack spacing={1.5} alignItems="flex-start">
+                <Typography variant="body2" color="text.secondary" sx={{ pr: 1 }}>
                   {item.title}
                 </Typography>
-                <Avatar
-                  sx={{
-                    bgcolor: item.accent,
-                    width: 34,
-                    height: 34,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <StatIcon sx={item.iconSx} />
-                </Avatar>
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                  {item.value}
+                </Typography>
+                <Chip
+                  label={item.change}
+                  size="small"
+                  color="success"
+                  variant="outlined"
+                  sx={{ borderRadius: 2 }}
+                />
               </Stack>
-              <Typography variant="h4" sx={{ mt: 1.5, fontWeight: 700 }}>
-                {item.value}
-              </Typography>
-              <Chip
-                label={item.change}
-                size="small"
-                color="success"
-                variant="outlined"
-                sx={{ mt: 1.5, borderRadius: 2 }}
-              />
             </Paper>
           </Grid>
           );

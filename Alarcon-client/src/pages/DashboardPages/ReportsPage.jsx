@@ -161,9 +161,7 @@ const ReportsPage = () => {
           sx={{
             p: { xs: 2.5, md: 3.5 },
             borderRadius: 3,
-            border: "1px solid",
-            borderColor: "divider",
-            background: "linear-gradient(135deg, rgba(15,23,42,1) 0%, rgba(51,65,85,1) 100%)",
+            background: "linear-gradient(135deg, rgba(15,23,42,1) 0%, rgba(14,116,144,1) 100%)",
             color: "white",
           }}
         >
@@ -193,10 +191,9 @@ const ReportsPage = () => {
               disabled={isExporting}
               size="large"
               sx={{
-                minWidth: { xs: "100%", sm: 220 },
+                minWidth: { xs: "100%", sm: 180 },
                 alignSelf: { xs: "stretch", md: "flex-start" },
                 mt: { md: 0 },
-                ml: { md: "auto" },
                 px: 3,
                 py: 1.2,
                 borderRadius: 2.5,

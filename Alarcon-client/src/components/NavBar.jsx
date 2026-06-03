@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import { SmokeBackground } from "./ui/spooky-smoke-animation";
 import logo from "../assets/images/logo.png";
+import { clearAuthSession, getStoredUser } from "../utils/auth";
+import {
+  canShowDashboardLink,
+  getUserDisplayName,
+  getUserRoleLabel,
+} from "../utils/navAccount";
 
 const links = [
   { label: "Home", to: "/" },
@@ -26,9 +32,14 @@ const dropdownLinkClass = ({ isActive }) =>
       : "text-white/90 hover:bg-white/10 hover:text-white",
   ].join(" ");
 
+const dropdownButtonClass =
+  "block w-full px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-white/90 transition hover:bg-white/10 hover:text-white";
+
 const NavBar = () => {
   const [accountOpen, setAccountOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
   const accountRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handlePointerDown = (e) => {
@@ -47,6 +58,24 @@ const NavBar = () => {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
+
+  useEffect(() => {
+    const handleStorage = () => setCurrentUser(getStoredUser());
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const handleAccountToggle = () => {
+    setCurrentUser(getStoredUser());
+    setAccountOpen((open) => !open);
+  };
+
+  const handleSignOut = () => {
+    clearAuthSession();
+    setCurrentUser(null);
+    setAccountOpen(false);
+    navigate("/");
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-16 border-b-2 border-zinc-900">
@@ -75,7 +104,7 @@ const NavBar = () => {
                 aria-expanded={accountOpen}
                 aria-haspopup="menu"
                 aria-label="Account menu"
-                onClick={() => setAccountOpen((o) => !o)}
+                onClick={handleAccountToggle}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-white/50 text-white/90 transition hover:border-white hover:bg-white/20 hover:text-white"
               >
                 <User className="h-4 w-4" strokeWidth={2} aria-hidden />
@@ -84,24 +113,57 @@ const NavBar = () => {
               {accountOpen ? (
                 <div
                   role="menu"
-                  className="absolute right-0 top-full z-[100] mt-2 min-w-[11rem] rounded-xl border-2 border-white/20 bg-zinc-950/95 py-1 shadow-xl backdrop-blur-md"
+                  className="absolute right-0 top-full z-[100] mt-2 min-w-[14rem] rounded-xl border-2 border-white/20 bg-zinc-950/95 py-1 shadow-xl backdrop-blur-md"
                 >
-                  <NavLink
-                    to="/auth/signin"
-                    role="menuitem"
-                    className={dropdownLinkClass}
-                    onClick={() => setAccountOpen(false)}
-                  >
-                    Log in
-                  </NavLink>
-                  <NavLink
-                    to="/auth/signup"
-                    role="menuitem"
-                    className={dropdownLinkClass}
-                    onClick={() => setAccountOpen(false)}
-                  >
-                    Sign up
-                  </NavLink>
+                  {currentUser ? (
+                    <>
+                      <div className="border-b border-white/10 px-4 py-3">
+                        <p className="truncate text-left text-xs font-semibold text-white">
+                          {getUserDisplayName(currentUser)}
+                        </p>
+                        <p className="mt-1 text-left text-[10px] font-semibold uppercase tracking-[0.2em] text-white/60">
+                          {getUserRoleLabel(currentUser)}
+                        </p>
+                      </div>
+                      {canShowDashboardLink(currentUser) ? (
+                        <NavLink
+                          to="/dashboard"
+                          role="menuitem"
+                          className={dropdownLinkClass}
+                          onClick={() => setAccountOpen(false)}
+                        >
+                          Dashboard
+                        </NavLink>
+                      ) : null}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className={dropdownButtonClass}
+                        onClick={handleSignOut}
+                      >
+                        Sign out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <NavLink
+                        to="/auth/signin"
+                        role="menuitem"
+                        className={dropdownLinkClass}
+                        onClick={() => setAccountOpen(false)}
+                      >
+                        Log in
+                      </NavLink>
+                      <NavLink
+                        to="/auth/signup"
+                        role="menuitem"
+                        className={dropdownLinkClass}
+                        onClick={() => setAccountOpen(false)}
+                      >
+                        Sign up
+                      </NavLink>
+                    </>
+                  )}
                 </div>
               ) : null}
             </div>

@@ -11,6 +11,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormHelperText,
   IconButton,
   MenuItem,
   Paper,
@@ -30,6 +31,8 @@ import {
   updateArticle,
 } from "../../services/ArticleService";
 import { getStoredUser, hasAllowedRole } from "../../utils/auth";
+import { readArticleImageAsDataUrl } from "../../utils/articleImageUpload";
+import { resolveArticleImage } from "../../data/articleImageMap";
 
 const blankForm = {
   name: "",
@@ -76,6 +79,28 @@ const DashArticleListPage = () => {
   const handleFieldChange = (key) => (event) => {
     const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
     setForm((prev) => ({ ...prev, [key]: value }));
+    setError("");
+  };
+
+  const handleImageFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      const imageDataUrl = await readArticleImageAsDataUrl(file);
+      setForm((prev) => ({ ...prev, image: imageDataUrl }));
+      setError("");
+    } catch (err) {
+      setError(err.message || "Failed to upload image.");
+    }
+  };
+
+  const handleClearImage = () => {
+    setForm((prev) => ({ ...prev, image: "" }));
     setError("");
   };
 
@@ -242,7 +267,7 @@ const DashArticleListPage = () => {
             borderRadius: 3,
             color: "white",
             background:
-              "linear-gradient(135deg, rgba(15,23,42,1) 0%, rgba(34,197,94,0.85) 100%)",
+              "linear-gradient(135deg, rgba(15,23,42,1) 0%, rgba(14,116,144,1) 100%)",
           }}
         >
           <Stack
@@ -293,7 +318,6 @@ const DashArticleListPage = () => {
         </Paper>
 
         {apiError ? <Alert severity="error">{apiError}</Alert> : null}
-        {error ? <Alert severity="error">{error}</Alert> : null}
 
         <Card sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider", overflow: "hidden" }}>
           <CardContent sx={{ p: { xs: 2, sm: 2.5 }, "&:last-child": { pb: { xs: 2, sm: 2.5 } } }}>
@@ -359,6 +383,8 @@ const DashArticleListPage = () => {
           </DialogTitle>
           <DialogContent dividers>
             <Stack spacing={2} sx={{ mt: 0.5 }}>
+              {error ? <Alert severity="error">{error}</Alert> : null}
+
               <TextField label="Title" value={form.title} onChange={handleFieldChange("title")} fullWidth />
               <TextField
                 label="Slug"
@@ -367,13 +393,55 @@ const DashArticleListPage = () => {
                 helperText="Optional. Leave blank to generate from the title."
                 fullWidth
               />
-              <TextField
-                label="Image"
-                value={form.image}
-                onChange={handleFieldChange("image")}
-                helperText="Use a known slug image key or a direct image URL."
-                fullWidth
-              />
+              <Stack spacing={1.25}>
+                <TextField
+                  label="Image"
+                  value={form.image}
+                  onChange={handleFieldChange("image")}
+                  helperText="Use a known slug image key, a direct image URL, or upload a JPG, PNG, or WebP image."
+                  fullWidth
+                />
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
+                  <Button variant="outlined" component="label" disabled={loading || !canEdit}>
+                    Upload Image
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      hidden
+                      onChange={handleImageFileChange}
+                    />
+                  </Button>
+                  {form.image ? (
+                    <Button variant="text" color="inherit" onClick={handleClearImage} disabled={loading || !canEdit}>
+                      Clear Image
+                    </Button>
+                  ) : null}
+                </Stack>
+                <FormHelperText>
+                  Uploaded images are stored with the article. Keep files 1 MB or smaller.
+                </FormHelperText>
+                {form.image ? (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      maxWidth: 280,
+                      aspectRatio: "4 / 3",
+                      borderRadius: 2,
+                      border: "1px solid",
+                      borderColor: "divider",
+                      overflow: "hidden",
+                      bgcolor: "grey.100",
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={resolveArticleImage(form.image)}
+                      alt="Article preview"
+                      sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    />
+                  </Box>
+                ) : null}
+              </Stack>
               <TextField
                 label="Content"
                 value={form.content}

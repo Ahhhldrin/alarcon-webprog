@@ -444,8 +444,6 @@ const UsersPage = () => {
           <Alert severity="error">{apiError}</Alert>
         ) : null}
 
-        {error ? <Alert severity="error">{error}</Alert> : null}
-
         <Card sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider", overflow: "hidden" }}>
           <CardContent sx={{ p: { xs: 2, sm: 2.5 }, "&:last-child": { pb: { xs: 2, sm: 2.5 } } }}>
             <Stack spacing={2}>
@@ -541,6 +539,8 @@ const UsersPage = () => {
         <DialogTitle sx={{ fontWeight: 700 }}>{editRowId ? "Update User" : "Add User"}</DialogTitle>
         <DialogContent dividers>
           <Stack spacing={2} sx={{ mt: 0.5 }}>
+            {error ? <Alert severity="error">{error}</Alert> : null}
+
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <TextField label="First name" value={form.firstName} onChange={handleFieldChange("firstName")} fullWidth />
               <TextField label="Last name" value={form.lastName} onChange={handleFieldChange("lastName")} fullWidth />
