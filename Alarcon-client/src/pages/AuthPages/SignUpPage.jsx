@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button.jsx";
-import { createUser, loginUser } from "../../services/UserService.js";
-import { setAuthSession } from "../../utils/auth.js";
+import { createUser } from "../../services/UserService.js";
+import { registerViewerAccount } from "../../services/signupFlow.js";
 
 const inputClasses =
   "mt-2 w-full rounded-xl border border-zinc-300 bg-zinc-100 px-4 py-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-zinc-50";
@@ -55,26 +55,16 @@ const SignUpPage = () => {
     setLoading(true);
 
     try {
-      // Create user account
-      const signupResponse = await createUser({
+      const result = await registerViewerAccount({
         firstName,
         lastName,
         email,
         password,
+      }, {
+        createUser,
       });
 
-      // Auto-login after successful signup
-      const loginResponse = await loginUser({ email, password });
-
-      if (loginResponse.data.token) {
-        setAuthSession({
-          token: loginResponse.data.token,
-          user: loginResponse.data.data || loginResponse.data,
-        });
-      }
-
-      // Navigate to dashboard
-      navigate("/dashboard", { state: { message: "Account created successfully!" } });
+      navigate(result.redirectTo, { state: { message: result.message } });
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || err.message || "Sign up failed. Please try again.";
