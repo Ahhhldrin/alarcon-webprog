@@ -1,7 +1,8 @@
+const env = import.meta.env ?? {};
+
 const HOST =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV
-    ? "/api"
-    : "https://alarcon-webprog-server.vercel.app/api");
+  env.VITE_API_BASE_URL ||
+  env.VITE_API_URL ||
+  (env.DEV ? "/api" : "https://alarcon-webprog-server.vercel.app/api");
 
 export default HOST;
