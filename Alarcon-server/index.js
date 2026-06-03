@@ -26,6 +26,10 @@ const ensureReady = async () => {
   return initPromise;
 };
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+
 app.use(async (req, res, next) => {
   try {
     await ensureReady();
@@ -34,10 +38,6 @@ app.use(async (req, res, next) => {
     next(error);
   }
 });
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors());
 
 const corsOptions = {
   origin: "*",
