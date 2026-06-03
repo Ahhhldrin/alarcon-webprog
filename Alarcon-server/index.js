@@ -73,7 +73,7 @@ app.use((err, req, res, next) => {
 
 module.exports = app;
 
-if (require.main === module) {
+if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
 
   ensureReady()
